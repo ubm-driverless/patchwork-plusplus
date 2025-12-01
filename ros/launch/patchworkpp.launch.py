@@ -26,9 +26,6 @@ def generate_launch_description():
     pointcloud_topic = LaunchConfiguration("cloud_topic")
     visualize = LaunchConfiguration("visualize", default="true")
 
-    # Optional ros bag play
-    bagfile = LaunchConfiguration("bagfile", default="")
-
     # Patchwork++ node
     patchworkpp_node = Node(
         package="patchworkpp",
@@ -44,7 +41,7 @@ def generate_launch_description():
                 "base_frame": base_frame,
                 "use_sim_time": use_sim_time,
                 # Patchwork++ configuration
-                "sensor_height": 1.88,
+                "sensor_height": 0.7,
                 "num_iter": 3,  # Number of iterations for ground plane estimation using PCA.
                 "num_lpr": 20,  # Maximum number of points to be selected as lowest points representative.
                 "num_min_pts": 0,  # Minimum number of points to be estimated as ground plane in each patch.
@@ -58,32 +55,12 @@ def generate_launch_description():
                 "min_range": 1.0,  # min_range of ground estimation area
                 "uprightness_thr": 0.101,
                 # threshold of uprightness using in Ground Likelihood Estimation(GLE). Please refer paper for more information about GLE.
-                "verbose": True,  # display verbose info
+                "verbose": false,  # display verbose info
             }
         ],
     )
-    rviz_node = Node(
-        package="rviz2",
-        executable="rviz2",
-        output="screen",
-        arguments=[
-            "-d",
-            PathJoinSubstitution(
-                [FindPackageShare("patchworkpp"), "rviz", "patchworkpp.rviz"]
-            ),
-        ],
-        condition=IfCondition(visualize),
-    )
-
-    bagfile_play = ExecuteProcess(
-        cmd=["ros2", "bag", "play", bagfile],
-        output="screen",
-        condition=IfCondition(PythonExpression(["'", bagfile, "' != ''"])),
-    )
     return LaunchDescription(
         [
-            patchworkpp_node,
-            rviz_node,
-            bagfile_play,
+            patchworkpp_node
         ]
     )
